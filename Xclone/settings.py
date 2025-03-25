@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "accounts",
     "tweets",
+    "corsheaders",
 
 ]
 
@@ -52,6 +53,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+
+
 ]
 
 ROOT_URLCONF = "Xclone.urls"
@@ -155,3 +159,8 @@ DEFAULT_FROM_EMAIL = 'seu_email@exemplo.com'
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
+CORS_ALLOW_ALL_ORIGINS = False
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]

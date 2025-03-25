@@ -30,13 +30,23 @@ class TweetMediaSerializer(serializers.ModelSerializer):
 
 
 class TweetSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField(read_only=True)  # Exibe o username, por exemplo.
+    author = serializers.StringRelatedField(read_only=True)
+    likes_count = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Tweet
-        fields = ['id', 'author', 'content', 'created_at', 'media']
+        fields = ['id', 'author', 'content', 'created_at', 'likes_count', 'is_liked']
         read_only_fields = ['id', 'author', 'created_at']
 
+    def get_likes_count(self, obj):
+        return obj.likes.count()
+
+    def get_is_liked(self, obj):
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        return obj.likes.filter(user=user).exists()
 
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
