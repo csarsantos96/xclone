@@ -1,10 +1,11 @@
 from rest_framework import generics, permissions, status
-
-from .serializers import UserRegisterSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
+from .serializers import UserSerializer, UserRegisterSerializer
 from .utils import (
     send_activation_email,
     decode_token,
@@ -14,6 +15,16 @@ from .utils import (
 
 User = get_user_model()
 
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_profile(request):
+    user = request.user
+    serializer = UserSerializer(user, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)
+
 class UserRegisterAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
@@ -22,7 +33,6 @@ class UserRegisterAPIView(generics.CreateAPIView):
     def perform_create(self, serializer):
         user = serializer.save(is_active=False)
         send_activation_email(user)
-
 
 class UserActivateAPIView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -37,7 +47,6 @@ class UserActivateAPIView(APIView):
         user.is_active = True
         user.save()
         return Response({"detail": "Conta ativada com sucesso!"}, status=status.HTTP_200_OK)
-
 
 class ForgotPasswordAPIView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -54,11 +63,8 @@ class ForgotPasswordAPIView(APIView):
         except User.DoesNotExist:
             return Response({"detail": "Se este e-mail existir, enviaremos um link de redefinição."})
 
-        # Envia e-mail com o link de redefinição
         send_reset_password_email(user)
         return Response({"detail": "Verifique seu e-mail para redefinir a senha."})
-
-
 
 class ResetPasswordAPIView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -92,3 +98,20 @@ class ResetPasswordAPIView(APIView):
         user.save()
 
         return Response({"detail": "Senha redefinida com sucesso!"}, status=status.HTTP_200_OK)
+
+class CreateUserAPIView(APIView):
+    def post(self, request):
+        firebase_uid = request.data.get("firebaseUid")
+        username = request.data.get("username")
+        email = request.data.get("email")
+
+        #
+        user, created = User.objects.get_or_create(email=email, defaults={
+            'username': username,
+            'is_active': True
+
+        })
+
+
+
+        return Response({"detail": "Usuário criado/atualizado com sucesso!"}, status=status.HTTP_200_OK)

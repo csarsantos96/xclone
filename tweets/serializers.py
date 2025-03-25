@@ -1,8 +1,10 @@
 from rest_framework import serializers
 from .models import Tweet
 from .models import Tweet, TweetMedia
+from .models import Like, Repost, Comment
 
 class TweetSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(read_only=True)
     class Meta:
         model = Tweet
         fields = ['id', 'author', 'content', 'created_at']
@@ -25,3 +27,32 @@ class TweetMediaSerializer(serializers.ModelSerializer):
         for media_item in media_data:
             TweetMedia.objects.create(tweet=tweet, **media_item)
         return tweet
+
+
+class TweetSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(read_only=True)  # Exibe o username, por exemplo.
+
+    class Meta:
+        model = Tweet
+        fields = ['id', 'author', 'content', 'created_at', 'media']
+        read_only_fields = ['id', 'author', 'created_at']
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = '__all__'
+
+
+class RepostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Repost
+        fields = '__all__'
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'user', 'content', 'created_at']

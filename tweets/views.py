@@ -1,6 +1,7 @@
 from rest_framework import generics, permissions, filters
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
 
 from .models import Tweet
 from .serializers import TweetSerializer
@@ -62,3 +63,17 @@ class TweetRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Tweet.objects.filter(author=self.request.user)
+
+
+class FeedTweetListAPIView(generics.ListAPIView):
+    serializer_class = TweetSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        following_ids = user.following.values_list('id', flat=True)
+
+        return Tweet.objects.filter(
+            Q(author__id__in=following_ids) | Q(author=user)
+        ).order_by('-created_at')
