@@ -173,4 +173,4 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-db.sqlite3
+db.sqlite3".env" 
