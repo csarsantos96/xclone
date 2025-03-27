@@ -7,6 +7,14 @@ def profile_image_upload_path(instance, filename):
 
 
 class CustomUser(AbstractUser):
+
+    following = models.ManyToManyField(
+        'self',
+        symmetrical=False,
+        related_name='followers',
+        blank=True
+    )
+
     name = models.CharField(max_length=255, blank=True, null=True)
 
 

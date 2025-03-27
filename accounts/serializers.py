@@ -1,8 +1,14 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-import re
+from accounts.models import CustomUser
+
 
 User = get_user_model()
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'name', 'profile_image']
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -27,17 +33,22 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         user = User(**validated_data)
         user.set_password(password)
-        user.is_active = False  # Usuário inativo até a ativação via email
+        user.is_active = False
         user.save()
-        # Aqui, você pode chamar uma função que envia o email de ativação
+
         self.send_activation_email(user)
         return user
 
     def send_activation_email(self, user):
-        # Implemente o envio de email conforme sua lógica:
-        # gere um token, construa a URL de ativação e envie o email.
-        activation_token = "TOKEN_GERADO_AQUI"  # Exemplo: usando Django's signing ou um JWT
+
+
+        activation_token = "TOKEN_GERADO_AQUI"
         activation_link = f"http://127.0.0.1:8000/api/accounts/activate/{activation_token}/"
         subject = "Ative sua conta"
         message = f"Olá {user.name}, clique no link para ativar sua conta: {activation_link}"
         user.email_user(subject, message)
+
+        class UserSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = CustomUser
+                fields = ['id', 'username', 'name', 'profile_image']

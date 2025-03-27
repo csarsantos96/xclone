@@ -20,10 +20,26 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from tweets.views import TweetListCreateAPIView, FeedTweetListAPIView, TweetDetailAPIView
+
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('api/accounts/', include('accounts.urls')),
     path('api/tweets/', include('tweets.urls')),
+
+
+
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+
+    path('feed/', FeedTweetListAPIView.as_view(), name='feed-tweets'),  # Feed de tweets
+    path('<int:pk>/', TweetDetailAPIView.as_view(), name='tweet-detail'),  # Detalhes do tweet
 ]
 
 if settings.DEBUG:

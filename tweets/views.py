@@ -1,10 +1,56 @@
-from rest_framework import generics, permissions, filters
+from rest_framework import generics, permissions, filters, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
 
-from .models import Tweet
-from .serializers import TweetSerializer
 from .permissions import IsAuthorOrReadOnly
+from rest_framework.response import Response
+
+from .models import Tweet, Like, Comment, Repost
+from .serializers import TweetSerializer, CommentSerializer
+from rest_framework.decorators import action
+
+
+class TweetViewSet(viewsets.ModelViewSet):
+    queryset = Tweet.objects.all().order_by('-created_at')
+    serializer_class = TweetSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
+
+    @action(detail=True, methods=['post'])
+    def like(self, request, pk=None):
+        tweet = self.get_object()
+        user = request.user
+
+        like, created = Like.objects.get_or_create(user=user, tweet=tweet)
+
+        if not created:
+            like.delete()
+            return Response({'status': 'unliked'})
+        return Response({'status': 'liked'})
+
+    @action(detail=True, methods=['post'])
+    def comment(self, request, pk=None):
+        tweet = self.get_object()
+        content = request.data.get('content')
+        if not content:
+            return Response({'error': 'Conteúdo obrigatório'}, status=400)
+
+        comment = Comment.objects.create(user=request.user, tweet=tweet, content=content)
+        return Response({'status': 'comentado', 'comment_id': comment.id})
+
+    @action(detail=True, methods=['post'])
+    def retweet(self, request, pk=None):
+        tweet = self.get_object()
+        Repost.objects.create(user=request.user, original_tweet=tweet)
+        return Response({'status': 'retweetado'})
+
+
+
 
 class TweetPagination(PageNumberPagination):
     page_size = 5
@@ -12,7 +58,6 @@ class TweetPagination(PageNumberPagination):
     max_page_size = 20
 
 class TweetListCreateAPIView(generics.ListCreateAPIView):
-
     queryset = Tweet.objects.all()
     serializer_class = TweetSerializer
     permission_classes = [IsAuthenticated]
@@ -20,8 +65,9 @@ class TweetListCreateAPIView(generics.ListCreateAPIView):
     pagination_class = TweetPagination
 
     def perform_create(self, serializer):
-
+        # O tweet é salvo com o autor sendo o usuário autenticado
         serializer.save(author=self.request.user)
+
 
 
 class TweetDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -47,18 +93,23 @@ class TweetListAPIView(generics.ListAPIView):
     def get_queryset(self):
         return Tweet.objects.filter(author=self.request.user)
 
-
-class TweetRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-
-    serializer_class = TweetSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return Tweet.objects.filter(author=self.request.user)
-
 class TweetRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TweetSerializer
     permission_classes = [permissions.IsAuthenticated, IsAuthorOrReadOnly]
 
     def get_queryset(self):
         return Tweet.objects.filter(author=self.request.user)
+
+
+class FeedTweetListAPIView(generics.ListAPIView):
+    serializer_class = TweetSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        following_ids = user.following.values_list('id', flat=True)
+
+        return Tweet.objects.filter(
+            Q(author__id__in=following_ids) | Q(author=user)
+        ).order_by('-created_at')
