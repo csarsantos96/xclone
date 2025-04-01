@@ -65,7 +65,12 @@ class TweetListCreateAPIView(generics.ListCreateAPIView):
     pagination_class = TweetPagination
 
     def perform_create(self, serializer):
+        print("👤 Request.user:", self.request.user)
+        print("🔒 Is authenticated:", self.request.user.is_authenticated)
+
+
         # O tweet é salvo com o autor sendo o usuário autenticado
+
         serializer.save(author=self.request.user)
 
 
