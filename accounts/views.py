@@ -1,9 +1,18 @@
+from django.http import HttpResponse
 from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from django.core.mail import send_mail
+from django.conf import settings
+
+from django.shortcuts import render
+
+
+from .email_utils import send_activation_email
+from rest_framework.permissions import AllowAny
 
 from .serializers import UserSerializer, UserRegisterSerializer
 from .utils import (
@@ -14,6 +23,21 @@ from .utils import (
 )
 
 User = get_user_model()
+
+def send_test_email(request):
+    try:
+        send_mail(
+            'Assunto do Teste',
+            'Corpo do email de teste.',
+            settings.DEFAULT_FROM_EMAIL,
+            ['contato@cesarsantos.dev']
+        )
+        return HttpResponse("E-mail de teste enviado com sucesso!")
+    except Exception as e:
+        return HttpResponse(f"Erro ao enviar o e-mail: {str(e)}")
+
+
+
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
