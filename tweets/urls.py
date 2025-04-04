@@ -7,7 +7,8 @@ from .views import (
     TweetDetailAPIView,
     TweetListAPIView,
     TweetRetrieveUpdateDestroyAPIView,
-    FeedTweetListAPIView
+    FeedTweetListAPIView,
+    UserTweetsListAPIView ,
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -24,6 +25,8 @@ urlpatterns = [
     path('<int:pk>/comment/', TweetViewSet.as_view({'post': 'comment'}), name='tweet-comment'),
     path('<int:pk>/retweet/', TweetViewSet.as_view({'post': 'retweet'}), name='tweet-retweet'),
     path('router/', include(router.urls)),  # Se quiser expor também as rotas automáticas
+
+path('user/<str:username>/', UserTweetsListAPIView.as_view(), name='user-tweets-list'),
 ]
 
 if settings.DEBUG:

@@ -31,12 +31,21 @@ class TweetMediaSerializer(serializers.ModelSerializer):
 
 class TweetSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField(read_only=True)
+    media = serializers.ImageField(required=False, allow_null=True)  # ou FileField, dependendo do seu uso
     likes_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Tweet
-        fields = ['id', 'author', 'content', 'created_at', 'likes_count', 'is_liked']
+        fields = [
+            'id',
+            'author',
+            'content',
+            'media',          # Adicione este campo
+            'created_at',
+            'likes_count',
+            'is_liked'
+        ]
         read_only_fields = ['id', 'author', 'created_at']
 
     def get_likes_count(self, obj):

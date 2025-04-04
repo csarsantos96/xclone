@@ -10,7 +10,6 @@ from django.conf import settings
 
 from django.shortcuts import render
 
-
 from .email_utils import send_activation_email
 from rest_framework.permissions import AllowAny
 
@@ -139,3 +138,12 @@ class CreateUserAPIView(APIView):
 
 
         return Response({"detail": "Usuário criado/atualizado com sucesso!"}, status=status.HTTP_200_OK)
+
+class UserDetailByUsernameAPIView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserSerializer
+    lookup_field = 'username'  # Permite buscar por /users/<username>/
+
+    def get_queryset(self):
+        return User.objects.all()
+
