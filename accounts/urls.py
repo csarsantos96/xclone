@@ -7,7 +7,8 @@ from .views import (
     ForgotPasswordAPIView,
     ResetPasswordAPIView,
     CreateUserAPIView,
-    send_test_email
+    send_test_email,
+    UserDetailByUsernameAPIView,
 )
 
 urlpatterns = [
@@ -16,5 +17,6 @@ urlpatterns = [
     path('forgot-password/', ForgotPasswordAPIView.as_view(), name='forgot-password'),
     path('reset-password/<path:token>/', ResetPasswordAPIView.as_view(), name='reset-password'),
     path('createUser/', CreateUserAPIView.as_view(), name='create_user'),
+path('<str:username>/', UserDetailByUsernameAPIView.as_view(), name='user-detail-by-username'),
 path('send-test-email/', send_test_email, name='send_test_email'),
 ]

@@ -2,6 +2,7 @@ from rest_framework import generics, permissions, filters, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from .permissions import IsAuthorOrReadOnly
 from rest_framework.response import Response
@@ -61,7 +62,8 @@ class TweetListCreateAPIView(generics.ListCreateAPIView):
     queryset = Tweet.objects.all()
     serializer_class = TweetSerializer
     permission_classes = [IsAuthenticated]
-
+    pagination_class = TweetPagination
+    parser_classes = [MultiPartParser, FormParser]  # Permite receber arquivos
     pagination_class = TweetPagination
 
     def perform_create(self, serializer):
@@ -118,3 +120,12 @@ class FeedTweetListAPIView(generics.ListAPIView):
         return Tweet.objects.filter(
             Q(author__id__in=following_ids) | Q(author=user)
         ).order_by('-created_at')
+
+
+class UserTweetsListAPIView(generics.ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = TweetSerializer
+
+    def get_queryset(self):
+        username = self.kwargs['username']
+        return Tweet.objects.filter(author__username=username).order_by('-created_at')
