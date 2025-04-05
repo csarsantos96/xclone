@@ -9,6 +9,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 
 from .email_utils import send_activation_email
 from rest_framework.permissions import AllowAny
@@ -147,3 +148,15 @@ class UserDetailByUsernameAPIView(generics.RetrieveAPIView):
     def get_queryset(self):
         return User.objects.all()
 
+
+class UserUpdateAPIView(generics.UpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserSerializer
+    lookup_field = 'username'  # Permite buscar /api/accounts/<username>/
+
+    def get_queryset(self):
+        return User.objects.all()
+
+    def partial_update(self, request, *args, **kwargs):
+        # Se quiser lógica extra, coloque aqui
+        return super().partial_update(request, *args, **kwargs)

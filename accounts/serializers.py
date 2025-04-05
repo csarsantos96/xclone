@@ -3,12 +3,18 @@ from django.contrib.auth import get_user_model
 from accounts.models import CustomUser
 
 
+
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'name', 'profile_image']
+
+        def validate_bio(self, value):
+            if len(value) > 140:
+                raise serializers.ValidationError("A bio não pode exceder 140 caracteres.")
+            return value
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -47,8 +53,3 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         subject = "Ative sua conta"
         message = f"Olá {user.name}, clique no link para ativar sua conta: {activation_link}"
         user.email_user(subject, message)
-
-        class UserSerializer(serializers.ModelSerializer):
-            class Meta:
-                model = CustomUser
-                fields = ['id', 'username', 'name', 'profile_image']
