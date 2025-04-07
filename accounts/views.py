@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.mail import send_mail
 from django.conf import settings
 
+from django.db.models import Q
+
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 
@@ -44,6 +46,24 @@ def send_test_email(request):
         return HttpResponse(f"Erro ao enviar o e-mail: {str(e)}")
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_users(request):
+    print("🔎 Entrou em search_users")
+    print("👤 Usuário:", request.user)
+    query = request.GET.get('query', '')
+    print("📝 Query:", query)
+
+    if query.startswith('@'):
+        query = query[1:]
+
+    users = User.objects.filter(
+        Q(username__icontains=query) | Q(name__icontains=query)
+    )
+    print("🔎 Achou usuários:", users)
+
+    serializer = UserSerializer(users, many=True)
+    return Response(serializer.data)
 
 
 @api_view(['PUT'])
