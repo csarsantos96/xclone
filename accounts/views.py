@@ -128,17 +128,23 @@ class CreateUserAPIView(APIView):
         firebase_uid = request.data.get("firebaseUid")
         username = request.data.get("username")
         email = request.data.get("email")
+        name = request.data.get("name", "")
 
-        #
-        user, created = User.objects.get_or_create(email=email, defaults={
-            'username': username,
-            'is_active': True
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={
+                'username': username,
+                'is_active': True,
+                'name': name,
+            }
+        )
 
-        })
+        if not created:
+            user.username = username
+            user.name = name
+            user.save()
 
-
-
-        return Response({"detail": "Usuário criado/atualizado com sucesso!"}, status=status.HTTP_200_OK)
+        return Response({"detail": "Usuário criado/atualizado com sucesso!"})
 
 class UserDetailByUsernameAPIView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]

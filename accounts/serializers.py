@@ -9,7 +9,7 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'name', 'profile_image']
+        fields = ['id', 'name', 'username', 'email', 'profile_image']
 
         def validate_bio(self, value):
             if len(value) > 140:
