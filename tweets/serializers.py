@@ -1,19 +1,35 @@
 from rest_framework import serializers
-
+from accounts.serializers import UserSerializer
 from .models import Tweet, TweetMedia
 from .models import Like, Repost, Comment
 
 class TweetSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField(read_only=True)
+    author = UserSerializer(read_only=True)  # Usa o serializer do usuário
+    media = serializers.ImageField(required=False, allow_null=True)
+    likes_count = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+
     class Meta:
         model = Tweet
-        fields = ['id', 'author', 'content', 'created_at']
+        fields = [
+            'id',
+            'author',
+            'content',
+            'media',
+            'created_at',
+            'likes_count',
+            'is_liked'
+        ]
         read_only_fields = ['id', 'author', 'created_at']
 
-class TweetMediaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TweetMedia
-        fields = ['id', 'file', 'media_type']
+    def get_likes_count(self, obj):
+        return obj.likes.count()
+
+    def get_is_liked(self, obj):
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        return obj.likes.filter(user=user).exists()
 
     def validate_file(self, value):
         max_size = 2 * 1024 * 1024  # 2 MB em bytes
