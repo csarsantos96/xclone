@@ -5,18 +5,35 @@ import re
 
 User = get_user_model()
 
+
 class UserSerializer(serializers.ModelSerializer):
+    # Campos para exibir contadores
+    following_count = serializers.SerializerMethodField()
+    followers_count = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'name', 'username', 'email', 'profile_image', 'cover_image']
-        # Mantemos 'id' e 'email' como read_only para evitar alterações indevidas
+        fields = [
+            'id',
+            'name',
+            'username',
+            'email',
+            'profile_image',
+            'cover_image',
+            'following_count',  # adiciona
+            'followers_count'  # adiciona
+        ]
         read_only_fields = ['id', 'email']
 
+    def get_following_count(self, obj):
+        return obj.following.count()
+
+    def get_followers_count(self, obj):
+        return obj.followers.count()
+
     def validate_username(self, value):
-        # Valida se o username começa com '@'
         if not value.startswith('@'):
             raise serializers.ValidationError("O username deve começar com '@'.")
-        # Validação via regex para letras, números e underscores
         if not re.match(r'^@[A-Za-z0-9_]+$', value):
             raise serializers.ValidationError(
                 "O username deve conter apenas letras, números e underscores, e começar com '@'.")
