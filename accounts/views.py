@@ -76,6 +76,35 @@ def update_profile(request):
         return Response(serializer.data)
     return Response(serializer.errors, status=400)
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def follow_user(request, username):
+    current_user = request.user
+    try:
+        target_user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response({"detail": "Usuário não encontrado."}, status=404)
+
+    if current_user == target_user:
+        return Response({"detail": "Você não pode seguir a si mesmo."}, status=400)
+
+    if target_user in current_user.following.all():
+        current_user.following.remove(target_user)
+        is_following = False
+    else:
+        current_user.following.add(target_user)
+        is_following = True
+
+    followers_count = target_user.followers.count()
+
+    return Response({
+        "is_following": is_following,
+        "followers_count": followers_count
+    })
+
+
+
 class UserRegisterAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer

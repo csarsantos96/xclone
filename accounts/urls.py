@@ -10,6 +10,7 @@ from .views import (
     update_profile,
     UserDetailUpdateAPIView,
     search_users,
+    follow_user,
 )
 
 urlpatterns = [
@@ -22,6 +23,9 @@ urlpatterns = [
     path('update/', update_profile, name='update_profile'),
     # Rota unificada para GET e PATCH:
     path('search/', search_users, name='search_users'),
+
+path('follow/<str:username>/', follow_user, name='follow_user'),
+
     path('<str:username>/', UserDetailUpdateAPIView.as_view(), name='user-detail-update'),
     path('send-test-email/', send_test_email, name='send_test_email'),
 ]
