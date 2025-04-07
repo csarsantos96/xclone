@@ -4,10 +4,13 @@ from django.contrib.auth.models import AbstractUser
 def profile_image_upload_path(instance, filename):
     return f'profile_images/{instance.username}/{filename}'
 
+def cover_image_upload_path(instance, filename):
+    return f'cover_images/{instance.username}/{filename}'
+
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)  # Garante que o email seja único
 
-    # Adicione um campo para armazenar o UID do Firebase
+    # Campo para armazenar o UID do Firebase
     firebase_uid = models.CharField(max_length=255, unique=True, null=True, blank=True)
 
     following = models.ManyToManyField(
@@ -21,6 +24,13 @@ class CustomUser(AbstractUser):
 
     profile_image = models.ImageField(
         upload_to=profile_image_upload_path,
+        blank=True,
+        null=True
+    )
+
+    # Novo campo para a imagem de capa
+    cover_image = models.ImageField(
+        upload_to=cover_image_upload_path,
         blank=True,
         null=True
     )

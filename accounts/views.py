@@ -27,7 +27,6 @@ User = get_user_model()
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_current_user(request):
-    # request.user deve ser o usuário autenticado
     serializer = UserSerializer(request.user)
     return Response(serializer.data)
 
@@ -148,7 +147,7 @@ class CreateUserAPIView(APIView):
                     'username': username,
                     'is_active': True,
                     'name': name,
-                    'firebase_uid': firebase_uid,  # Guarde o UID também
+                    'firebase_uid': firebase_uid,
                 }
             )
             if not created:
@@ -178,14 +177,16 @@ class UserDetailByUsernameAPIView(generics.RetrieveAPIView):
         return User.objects.all()
 
 
-class UserUpdateAPIView(generics.UpdateAPIView):
+class UserDetailUpdateAPIView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserSerializer
-    lookup_field = 'username'  # Permite buscar /api/accounts/<username>/
+    lookup_field = 'username'  # Ex: /api/accounts/<username>/
 
     def get_queryset(self):
         return User.objects.all()
 
     def partial_update(self, request, *args, **kwargs):
-        # Se quiser lógica extra, coloque aqui
+        user_obj = self.get_object()
+        if user_obj != request.user:
+            return Response({"detail": "Você não pode editar outro usuário."}, status=403)
         return super().partial_update(request, *args, **kwargs)
