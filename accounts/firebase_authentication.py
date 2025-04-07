@@ -32,13 +32,23 @@ class FirebaseAuthentication(authentication.BaseAuthentication):
         User = get_user_model()
 
         try:
+            # Tenta buscar o usuário pelo uid como username
             user = User.objects.get(username=uid)
-            print("👤 Usuário encontrado:", user)
+            print("👤 Usuário encontrado pelo username:", user)
         except User.DoesNotExist:
-            print("🆕 Criando novo usuário...")
-            user = User(username=uid, email=email, name=name)
-            user.set_unusable_password()
-            user.save()
+            try:
+                # Se não encontrar, tenta buscar pelo e-mail
+                user = User.objects.get(email=email)
+                print("👤 Usuário encontrado pelo email:", user)
+                # Se o username não for o uid, atualiza para garantir consistência
+                if user.username != uid:
+                    user.username = uid
+                    user.save()
+            except User.DoesNotExist:
+                print("🆕 Criando novo usuário...")
+                user = User(username=uid, email=email, name=name)
+                user.set_unusable_password()
+                user.save()
 
         print("✅ Autenticado:", user.is_authenticated)
         return (user, None)
