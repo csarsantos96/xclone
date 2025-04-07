@@ -24,6 +24,14 @@ from .utils import (
 
 User = get_user_model()
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_current_user(request):
+    # request.user deve ser o usuário autenticado
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data)
+
+
 def send_test_email(request):
     try:
         send_mail(
@@ -130,21 +138,36 @@ class CreateUserAPIView(APIView):
         email = request.data.get("email")
         name = request.data.get("name", "")
 
-        user, created = User.objects.get_or_create(
-            email=email,
-            defaults={
-                'username': username,
-                'is_active': True,
-                'name': name,
-            }
-        )
-
-        if not created:
-            user.username = username
-            user.name = name
-            user.save()
+        # Tente buscar o usuário pelo firebase_uid se existir, senão pelo email
+        try:
+            user = User.objects.get(firebase_uid=firebase_uid)
+        except User.DoesNotExist:
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={
+                    'username': username,
+                    'is_active': True,
+                    'name': name,
+                    'firebase_uid': firebase_uid,  # Guarde o UID também
+                }
+            )
+            if not created:
+                # Se o usuário já existe pelo e-mail, atualize o firebase_uid caso não esteja preenchido
+                if not user.firebase_uid:
+                    user.firebase_uid = firebase_uid
+                user.username = username  # Atualize para o username amigável desejado
+                user.name = name
+                user.save()
+        else:
+            # Se o usuário foi encontrado pelo firebase_uid, atualize os dados se necessário
+            if user.email != email or user.username != username or user.name != name:
+                user.email = email
+                user.username = username
+                user.name = name
+                user.save()
 
         return Response({"detail": "Usuário criado/atualizado com sucesso!"})
+
 
 class UserDetailByUsernameAPIView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]

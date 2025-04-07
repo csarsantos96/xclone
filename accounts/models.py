@@ -7,6 +7,9 @@ def profile_image_upload_path(instance, filename):
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)  # Garante que o email seja único
 
+    # Adicione um campo para armazenar o UID do Firebase
+    firebase_uid = models.CharField(max_length=255, unique=True, null=True, blank=True)
+
     following = models.ManyToManyField(
         'self',
         symmetrical=False,
