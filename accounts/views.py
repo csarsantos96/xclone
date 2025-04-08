@@ -8,8 +8,10 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.mail import send_mail
 from django.conf import settings
 
-from django.shortcuts import render
+from django.db.models import Q
 
+from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 
 from .email_utils import send_activation_email
 from rest_framework.permissions import AllowAny
@@ -24,6 +26,13 @@ from .utils import (
 
 User = get_user_model()
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_current_user(request):
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data)
+
+
 def send_test_email(request):
     try:
         send_mail(
@@ -37,6 +46,24 @@ def send_test_email(request):
         return HttpResponse(f"Erro ao enviar o e-mail: {str(e)}")
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_users(request):
+    print("🔎 Entrou em search_users")
+    print("👤 Usuário:", request.user)
+    query = request.GET.get('query', '')
+    print("📝 Query:", query)
+
+    if query.startswith('@'):
+        query = query[1:]
+
+    users = User.objects.filter(
+        Q(username__icontains=query) | Q(name__icontains=query)
+    )
+    print("🔎 Achou usuários:", users)
+
+    serializer = UserSerializer(users, many=True)
+    return Response(serializer.data)
 
 
 @api_view(['PUT'])
@@ -48,6 +75,33 @@ def update_profile(request):
         serializer.save()
         return Response(serializer.data)
     return Response(serializer.errors, status=400)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def follow_user(request, username):
+    current_user = request.user
+    try:
+        target_user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response({"detail": "Usuário não encontrado."}, status=404)
+
+    if current_user == target_user:
+        return Response({"detail": "Você não pode seguir a si mesmo."}, status=400)
+
+    if target_user in current_user.following.all():
+        current_user.following.remove(target_user)
+        is_following = False
+    else:
+        current_user.following.add(target_user)
+        is_following = True
+
+    followers_count = target_user.followers.count()
+
+    return Response({
+        "is_following": is_following,
+        "followers_count": followers_count
+    })
 
 class UserRegisterAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -128,14 +182,58 @@ class CreateUserAPIView(APIView):
         firebase_uid = request.data.get("firebaseUid")
         username = request.data.get("username")
         email = request.data.get("email")
+        name = request.data.get("name", "")
 
-        #
-        user, created = User.objects.get_or_create(email=email, defaults={
-            'username': username,
-            'is_active': True
+        # Tente buscar o usuário pelo firebase_uid se existir, senão pelo email
+        try:
+            user = User.objects.get(firebase_uid=firebase_uid)
+        except User.DoesNotExist:
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={
+                    'username': username,
+                    'is_active': True,
+                    'name': name,
+                    'firebase_uid': firebase_uid,
+                }
+            )
+            if not created:
+                # Se o usuário já existe pelo e-mail, atualize o firebase_uid caso não esteja preenchido
+                if not user.firebase_uid:
+                    user.firebase_uid = firebase_uid
+                user.username = username  # Atualize para o username amigável desejado
+                user.name = name
+                user.save()
+        else:
+            # Se o usuário foi encontrado pelo firebase_uid, atualize os dados se necessário
+            if user.email != email or user.username != username or user.name != name:
+                user.email = email
+                user.username = username
+                user.name = name
+                user.save()
 
-        })
+        return Response({"detail": "Usuário criado/atualizado com sucesso!"})
 
 
+class UserDetailByUsernameAPIView(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserSerializer
+    lookup_field = 'username'  # Permite buscar por /users/<username>/
 
-        return Response({"detail": "Usuário criado/atualizado com sucesso!"}, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        return User.objects.all()
+
+
+class UserDetailUpdateAPIView(generics.RetrieveUpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserSerializer
+    lookup_field = 'username'  # Ex: /api/accounts/<username>/
+
+    def get_queryset(self):
+        return User.objects.all()
+
+    def partial_update(self, request, *args, **kwargs):
+        user_obj = self.get_object()
+        if user_obj != request.user:
+            return Response({"detail": "Você não pode editar outro usuário."}, status=403)
+        return super().partial_update(request, *args, **kwargs)

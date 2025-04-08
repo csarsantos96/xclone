@@ -1,3 +1,4 @@
+#root/urls
 """
 URL configuration for Xclone project.
 
@@ -37,7 +38,7 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-path('', TweetListCreateAPIView.as_view(), name='tweet-list-create'),  # Para a criação de tweets
+    path('', TweetListCreateAPIView.as_view(), name='tweet-list-create'),  # Para a criação de tweets
     path('feed/', FeedTweetListAPIView.as_view(), name='feed-tweets'),  # Feed de tweets
     path('<int:pk>/', TweetDetailAPIView.as_view(), name='tweet-detail'),  # Detalhes do tweet
 ]
