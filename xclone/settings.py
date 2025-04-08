@@ -15,15 +15,24 @@ from dotenv import load_dotenv
 
 from corsheaders.defaults import default_headers
 
-import firebase_admin
-from firebase_admin import credentials
-import json
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, "env.dev"))
 
+print(os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY'))
+
+import firebase_admin
+from firebase_admin import credentials
+import json
+
+firebase_key = os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY')
+
+if firebase_key:
+    cred = credentials.Certificate(json.loads(firebase_key))  # Carregar diretamente o JSON
+    firebase_admin.initialize_app(cred)
+else:
+    raise ValueError("O Firebase Service Account Key não foi encontrado.")
 
 cred_path = os.path.join(BASE_DIR, "serviceAccountKey.json")
 cred = credentials.Certificate(cred_path)
@@ -187,13 +196,4 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 
-firebase_key = os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY')
 
-print("FIREBASE_SERVICE_ACCOUNT_KEY:", firebase_key)  # Adicionando um print para debug
-
-if firebase_key:
-    # Converte a chave JSON para o formato correto
-    cred = credentials.Certificate(json.loads(firebase_key))
-    firebase_admin.initialize_app(cred)
-else:
-    raise ValueError("O Firebase Service Account Key não foi encontrado.")
