@@ -42,14 +42,14 @@ jobs:
       - name: Run migrations
         env:
           DATABASE_URL: postgres://postgres:1896@localhost:5432/x_db
-          DJANGO_SETTINGS_MODULE: xclone.settings
+          DJANGO_SETTINGS_MODULE: Xclone.settings
         run: |
           python manage.py migrate
 
       - name: Run tests
         env:
           DATABASE_URL: postgres://postgres:1896@localhost:5432/x_db
-          DJANGO_SETTINGS_MODULE: xclone.settings
+          DJANGO_SETTINGS_MODULE: Xclone.settings
         run: |
           python manage.py test
 
