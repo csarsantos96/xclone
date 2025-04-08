@@ -180,3 +180,5 @@ serviceAccountKey.json
 env
 
 /media/
+
+.github/workflows/django.yml
