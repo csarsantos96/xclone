@@ -15,9 +15,9 @@ jobs:
       postgres:
         image: postgres:13
         env:
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}        # Usando a variável secret do GitHub
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}    # Usando a variável secret do GitHub
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}  # Usando a variável secret do GitHub
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -41,15 +41,17 @@ jobs:
 
       - name: Run migrations
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}       # Usando a variável secret do GitHub
-          DJANGO_SETTINGS_MODULE: xclone.settings        # Ajustado para o novo nome do diretório
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DJANGO_SETTINGS_MODULE: xclone.settings
+          FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
         run: |
           python manage.py migrate
 
       - name: Run tests
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}       # Usando a variável secret do GitHub
-          DJANGO_SETTINGS_MODULE: xclone.settings        # Ajustado para o novo nome do diretório
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DJANGO_SETTINGS_MODULE: xclone.settings
+          FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
         run: |
           python manage.py test
 
