@@ -12,12 +12,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import firebase_admin
-from firebase_admin import credentials
 
 from corsheaders.defaults import default_headers
 
-
+import firebase_admin
+from firebase_admin import credentials
+import json
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,7 +27,7 @@ load_dotenv(os.path.join(BASE_DIR, "env.dev"))
 
 cred_path = os.path.join(BASE_DIR, "serviceAccountKey.json")
 cred = credentials.Certificate(cred_path)
-firebase_admin.initialize_app(cred)
+
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "authorization",
@@ -186,3 +186,14 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 
+
+firebase_key = os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY')
+
+print("FIREBASE_SERVICE_ACCOUNT_KEY:", firebase_key)  # Adicionando um print para debug
+
+if firebase_key:
+    # Converte a chave JSON para o formato correto
+    cred = credentials.Certificate(json.loads(firebase_key))
+    firebase_admin.initialize_app(cred)
+else:
+    raise ValueError("O Firebase Service Account Key não foi encontrado.")
