@@ -22,19 +22,20 @@ load_dotenv(os.path.join(BASE_DIR, "env.dev"))
 
 print(os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY'))
 
-import json
 import os
+import json
 import firebase_admin
 from firebase_admin import credentials, initialize_app
 
-# Carregar a chave JSON diretamente da variável de ambiente
-firebase_key_str = os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY')
+firebase_key = os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY')
 
-# Verifique se a variável de ambiente foi carregada corretamente
-if firebase_key_str:
-    firebase_key = json.loads(firebase_key_str)  # Converte a string JSON em um dicionário
-    cred = credentials.Certificate(firebase_key)
-    initialize_app(cred)
+if firebase_key:
+    try:
+        firebase_key = json.loads(firebase_key)  # Convertendo a string JSON em um dicionário
+        cred = credentials.Certificate(firebase_key)
+        initialize_app(cred)
+    except json.JSONDecodeError:
+        raise ValueError("FIREBASE_SERVICE_ACCOUNT_KEY não foi configurado corretamente.")
 else:
     raise ValueError("FIREBASE_SERVICE_ACCOUNT_KEY não foi configurado corretamente.")
 
