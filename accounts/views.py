@@ -103,8 +103,6 @@ def follow_user(request, username):
         "followers_count": followers_count
     })
 
-
-
 class UserRegisterAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
