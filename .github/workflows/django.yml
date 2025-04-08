@@ -27,10 +27,10 @@ jobs:
           - 5432:5432
 
     steps:
-      # Faça checkout do código
+      # Faz checkout do código
       - uses: actions/checkout@v3
 
-      # Configure a versão do Python (ajuste para a versão do seu projeto)
+      # Configura a versão do Python (ajuste conforme a versão usada no seu projeto)
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -42,10 +42,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Cria as migrações (opcional, dependendo dos seus testes)
+      # Define variáveis de ambiente necessárias, incluindo DATABASE_URL e o módulo de settings do Django
       - name: Run migrations
         env:
           DATABASE_URL: postgres://postgres:1896@localhost:5432/x_db
+          DJANGO_SETTINGS_MODULE: Xclone.settings
         run: |
           python manage.py migrate
 
@@ -53,10 +54,11 @@ jobs:
       - name: Run tests
         env:
           DATABASE_URL: postgres://postgres:1896@localhost:5432/x_db
+          DJANGO_SETTINGS_MODULE: Xclone.settings
         run: |
           python manage.py test
 
-      # Opcional: Rode ferramentas de lint (por exemplo, flake8)
+      # Executa o flake8 para verificação de lint (opcional)
       - name: Run flake8
         run: |
           pip install flake8
