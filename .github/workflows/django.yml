@@ -1,0 +1,63 @@
+name: Django CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: x_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: 1896
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      # Faça checkout do código
+      - uses: actions/checkout@v3
+
+      # Configure a versão do Python (ajuste para a versão do seu projeto)
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      # Atualiza o pip e instala as dependências do projeto
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Cria as migrações (opcional, dependendo dos seus testes)
+      - name: Run migrations
+        env:
+          DATABASE_URL: postgres://postgres:1896@localhost:5432/x_db
+        run: |
+          python manage.py migrate
+
+      # Executa os testes do Django
+      - name: Run tests
+        env:
+          DATABASE_URL: postgres://postgres:1896@localhost:5432/x_db
+        run: |
+          python manage.py test
+
+      # Opcional: Rode ferramentas de lint (por exemplo, flake8)
+      - name: Run flake8
+        run: |
+          pip install flake8
+          flake8
