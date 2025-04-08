@@ -23,16 +23,12 @@ load_dotenv(os.path.join(BASE_DIR, "env.dev"))
 print(os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY'))
 
 import os
-import json
 import firebase_admin
 from firebase_admin import credentials, initialize_app
 
-# Carregar a chave diretamente do arquivo serviceAccountKey.json
+# Caminho para o arquivo serviceAccountKey.json
 cred = credentials.Certificate(os.path.join(os.getcwd(), 'serviceAccountKey.json'))
 initialize_app(cred)
-
-
-
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "authorization",
 ]

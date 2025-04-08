@@ -3,10 +3,10 @@ name: Run Migrations and Tests
 on:
   push:
     branches:
-      - main
+      - main  # You can adjust this to the branch you're working with
   pull_request:
     branches:
-      - main
+      - main  # You can adjust this to the branch you're working with
 
 jobs:
   test:
@@ -17,7 +17,8 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up Firebase Key
-        run: echo "FIREBASE_SERVICE_ACCOUNT_KEY=${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" >> $GITHUB_ENV
+        run: |
+          echo "FIREBASE_SERVICE_ACCOUNT_KEY=${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" >> $GITHUB_ENV
 
       - name: Set up Python environment
         uses: actions/setup-python@v2

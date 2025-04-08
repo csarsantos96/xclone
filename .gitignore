@@ -57,7 +57,7 @@ cover/
 
 # Django stuff:
 *.log
-local_settings.py
+
 db.sqlite3
 db.sqlite3-journal
 
@@ -175,6 +175,7 @@ cython_debug/
 
 env.dev
 .idea/
+
 serviceAccountKey.json
 
 env
