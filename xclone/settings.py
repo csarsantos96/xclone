@@ -28,11 +28,15 @@ import firebase_admin
 from firebase_admin import credentials, initialize_app
 
 # Carregar a chave JSON diretamente da variável de ambiente
-firebase_key = json.loads(os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY'))  # Carrega a chave do Firebase a partir do segredo
+firebase_key_str = os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY')
 
-# Inicializar o Firebase com a chave carregada
-cred = credentials.Certificate(firebase_key)
-initialize_app(cred)
+# Verifique se a variável de ambiente foi carregada corretamente
+if firebase_key_str:
+    firebase_key = json.loads(firebase_key_str)  # Converte a string JSON em um dicionário
+    cred = credentials.Certificate(firebase_key)
+    initialize_app(cred)
+else:
+    raise ValueError("FIREBASE_SERVICE_ACCOUNT_KEY não foi configurado corretamente.")
 
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
