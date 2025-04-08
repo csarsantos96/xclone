@@ -178,3 +178,5 @@ env.dev
 Xclone/settings.py
 serviceAccountKey.json
 env
+
+/media/
