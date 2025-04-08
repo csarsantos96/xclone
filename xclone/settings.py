@@ -22,20 +22,23 @@ load_dotenv(os.path.join(BASE_DIR, "env.dev"))
 
 print(os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY'))
 
+import os
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, initialize_app
 import json
 
+# Carregar a chave diretamente do ambiente
 firebase_key = os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY')
 
+# Verificar se a variável de ambiente foi carregada corretamente
+print(firebase_key)  # Isso irá imprimir a chave ou None se não estiver carregada corretamente
+
 if firebase_key:
-    cred = credentials.Certificate(json.loads(firebase_key))  # Carregar diretamente o JSON
-    firebase_admin.initialize_app(cred)
+    # Carregar o JSON diretamente
+    cred = credentials.Certificate(json.loads(firebase_key))  # Converte a chave para JSON
+    initialize_app(cred)
 else:
     raise ValueError("O Firebase Service Account Key não foi encontrado.")
-
-cred_path = os.path.join(BASE_DIR, "serviceAccountKey.json")
-cred = credentials.Certificate(cred_path)
 
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
