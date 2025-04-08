@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 
 from corsheaders.defaults import default_headers
 
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,22 +23,22 @@ load_dotenv(os.path.join(BASE_DIR, "env.dev"))
 
 print(os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY'))
 
-import os
+
 import json
-import firebase_admin
 from firebase_admin import credentials, initialize_app
 
+# Carrega a chave do Firebase da variável de ambiente
 firebase_key = os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY')
 
-if firebase_key:
-    try:
-        firebase_key = json.loads(firebase_key)  # Convertendo a string JSON em um dicionário
-        cred = credentials.Certificate(firebase_key)
-        initialize_app(cred)
-    except json.JSONDecodeError:
-        raise ValueError("FIREBASE_SERVICE_ACCOUNT_KEY não foi configurado corretamente.")
-else:
+if not firebase_key:
     raise ValueError("FIREBASE_SERVICE_ACCOUNT_KEY não foi configurado corretamente.")
+
+# Converte a chave para um objeto JSON
+firebase_key_dict = json.loads(firebase_key)
+
+# Inicializa o Firebase com a chave
+cred = credentials.Certificate(firebase_key_dict)
+initialize_app(cred)
 
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
