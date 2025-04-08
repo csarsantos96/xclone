@@ -27,7 +27,6 @@ jobs:
           - 5432:5432
 
     steps:
-
       - uses: actions/checkout@v3
 
       - name: Set up Python
@@ -35,24 +34,22 @@ jobs:
         with:
           python-version: '3.12'
 
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-
       - name: Run migrations
         env:
           DATABASE_URL: postgres://postgres:1896@localhost:5432/x_db
-          DJANGO_SETTINGS_MODULE: Xclone.settings
+          DJANGO_SETTINGS_MODULE: xclone.settings
         run: |
           python manage.py migrate
 
       - name: Run tests
         env:
           DATABASE_URL: postgres://postgres:1896@localhost:5432/x_db
-          DJANGO_SETTINGS_MODULE: Xclone.settings
+          DJANGO_SETTINGS_MODULE: xclone.settings
         run: |
           python manage.py test
 
