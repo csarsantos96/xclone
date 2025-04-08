@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
 from pathlib import Path
-from dotenv import  load_dotenv
+from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials
 
@@ -38,6 +38,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "fallback-secret-key")
+
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
