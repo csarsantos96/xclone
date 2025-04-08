@@ -1,5 +1,5 @@
 """
-ASGI config for Xclone project.
+ASGI config for xclone project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Xclone.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "xclone.settings")
 
 application = get_asgi_application()
