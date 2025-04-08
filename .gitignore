@@ -175,8 +175,8 @@ cython_debug/
 
 env.dev
 .idea/
-
 serviceAccountKey.json
+
 env
 
 /media/
