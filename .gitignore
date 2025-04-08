@@ -175,10 +175,10 @@ cython_debug/
 
 env.dev
 .idea/
-xclone/settings.py
+
 serviceAccountKey.json
 env
 
 /media/
 
-.github/workflows/django.yml
+
