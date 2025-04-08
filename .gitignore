@@ -175,7 +175,7 @@ cython_debug/
 
 env.dev
 .idea/
-xclone/settings.py
+Xclone/settings.py
 serviceAccountKey.json
 env
 
