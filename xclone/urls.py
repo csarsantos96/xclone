@@ -17,7 +17,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -40,12 +40,12 @@ urlpatterns = [
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 
-    # Rotas adicionais (ex: feed e tweet detail)
-    path("feed/", FeedTweetListAPIView.as_view(), name="feed-tweets"),
-    path("<int:pk>/", TweetDetailAPIView.as_view(), name="tweet-detail"),
+    # Rotas adicionais da API
+    path("api/tweets/feed/", FeedTweetListAPIView.as_view(), name="feed-tweets"),
+    path("api/tweets/<int:pk>/", TweetDetailAPIView.as_view(), name="tweet-detail"),
 
-    # 👇 Essa rota **tem que ser a última**: serve o front-end do React
-    path("", FrontendAppView.as_view(), name="frontend"),
+    # React fallback – serve index.html pra qualquer rota que não seja /api/ ou /admin/
+    re_path(r"^(?!api/|admin/).*", FrontendAppView.as_view(), name="frontend"),
 ]
 
 if settings.DEBUG:
