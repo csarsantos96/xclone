@@ -16,10 +16,12 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: Set up Firebase service account key
+      - name: Set up Firebase key
         run: |
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" > serviceAccountKey.json
+          printf "%s" "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" > serviceAccountKey.json
           echo "FIREBASE_SERVICE_ACCOUNT_KEY_PATH=./serviceAccountKey.json" >> $GITHUB_ENV
+      
+      
 
       - name: Set up Python environment
         uses: actions/setup-python@v2
