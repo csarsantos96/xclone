@@ -8,3 +8,4 @@ tzdata==2025.1
 djangorestframework-simplejwt
 firebase-admin
 django-cors-headers
+Pillow>=10.0.0
