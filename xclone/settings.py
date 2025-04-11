@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
 from pathlib import Path
+
+import firebase_admin
 from dotenv import load_dotenv
 
 from corsheaders.defaults import default_headers
@@ -27,19 +29,13 @@ print(os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY'))
 import json
 from firebase_admin import credentials, initialize_app
 
-# Carrega a chave do Firebase da variável de ambiente
-firebase_key = os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY')
+service_key_path = os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY_PATH")
 
-if not firebase_key:
+if not service_key_path or not os.path.exists(service_key_path):
     raise ValueError("FIREBASE_SERVICE_ACCOUNT_KEY não foi configurado corretamente.")
 
-# Converte a chave para um objeto JSON
-firebase_key_dict = json.loads(firebase_key)
-
-# Inicializa o Firebase com a chave
-cred = credentials.Certificate(firebase_key_dict)
-initialize_app(cred)
-
+cred = credentials.Certificate(service_key_path)
+firebase_admin.initialize_app(cred)
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "authorization",

@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -15,10 +16,10 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v2
 
-      - name: Set up Firebase Key
+      - name: Set up Firebase service account key
         run: |
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" > firebase_key.json
-          echo "Firebase key saved to environment"
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" > serviceAccountKey.json
+          echo "FIREBASE_SERVICE_ACCOUNT_KEY_PATH=./serviceAccountKey.json" >> $GITHUB_ENV
 
       - name: Set up Python environment
         uses: actions/setup-python@v2
@@ -33,9 +34,5 @@ jobs:
       - name: Run migrations
         run: python manage.py migrate
 
-      - name: Run Firebase key test
-        run: python tests/test_firebase_key.py
-
       - name: Run tests
         run: python manage.py test
-

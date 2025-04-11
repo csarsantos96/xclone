@@ -2,9 +2,11 @@ from rest_framework import generics, permissions, filters, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
-from rest_framework.parsers import MultiPartParser, FormParser
+
 from rest_framework.response import Response
 from rest_framework.decorators import action
+
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 
 from .permissions import IsAuthorOrReadOnly
@@ -15,7 +17,7 @@ class TweetViewSet(viewsets.ModelViewSet):
     queryset = Tweet.objects.all().order_by('-created_at')
     serializer_class = TweetSerializer
     permission_classes = [permissions.IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]  # ✅ agora sim, completo
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -42,17 +44,14 @@ class TweetViewSet(viewsets.ModelViewSet):
         comment = Comment.objects.create(user=request.user, tweet=tweet, content=content)
         return Response({'status': 'comentado', 'comment_id': comment.id})
 
-    # Remova o primeiro método de retweet duplicado, e mantenha este:
     @action(detail=True, methods=['post'])
     def retweet(self, request, pk=None):
         tweet = self.get_object()
-        # Cria um novo tweet com o conteúdo original prefixado com "RT: "
         new_tweet = Tweet.objects.create(
             author=request.user,
             content=f"RT: {tweet.content}",
-            media=tweet.media  # Opcional: se você deseja copiar a mídia
+            media=tweet.media
         )
-        # Registra o retweet (opcional, caso deseje manter histórico)
         Repost.objects.create(user=request.user, original_tweet=tweet)
         serializer = self.get_serializer(new_tweet)
         return Response(serializer.data, status=201)
@@ -67,7 +66,7 @@ class TweetListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = TweetSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = TweetPagination
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
 
     def perform_create(self, serializer):
         print("👤 Request.user:", self.request.user)
