@@ -99,7 +99,7 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "frontend", "build")],  
+        "DIRS": [os.path.join(BASE_DIR, "frontend", "build")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
