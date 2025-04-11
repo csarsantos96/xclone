@@ -22,7 +22,7 @@ jobs:
           ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
           EOF
           echo "FIREBASE_SERVICE_ACCOUNT_KEY_PATH=./serviceAccountKey.json" >> $GITHUB_ENV
-      
+
       - name: Set up Python environment
         uses: actions/setup-python@v2
         with:
