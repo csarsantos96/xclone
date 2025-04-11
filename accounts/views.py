@@ -213,6 +213,7 @@ class UserDetailUpdateAPIView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserSerializer
     lookup_field = 'username'
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_queryset(self):
         return User.objects.all()
