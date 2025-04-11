@@ -21,7 +21,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from tweets.views import TweetListCreateAPIView, FeedTweetListAPIView, TweetDetailAPIView
+from frontend.views import FrontendAppView
+from tweets.views import FeedTweetListAPIView, TweetDetailAPIView
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -30,17 +31,21 @@ from rest_framework_simplejwt.views import (
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('api/accounts/', include('accounts.urls')),
-    path('api/tweets/', include('tweets.urls')),
 
-    path('tweets/', TweetListCreateAPIView.as_view(), name='tweet-list-create'),
+    # Rotas da API
+    path("api/accounts/", include("accounts.urls")),
+    path("api/tweets/", include("tweets.urls")),
 
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # JWT
+    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 
-    path('', TweetListCreateAPIView.as_view(), name='tweet-list-create'),  # Para a criação de tweets
-    path('feed/', FeedTweetListAPIView.as_view(), name='feed-tweets'),  # Feed de tweets
-    path('<int:pk>/', TweetDetailAPIView.as_view(), name='tweet-detail'),  # Detalhes do tweet
+    # Rotas adicionais (ex: feed e tweet detail)
+    path("feed/", FeedTweetListAPIView.as_view(), name="feed-tweets"),
+    path("<int:pk>/", TweetDetailAPIView.as_view(), name="tweet-detail"),
+
+    # 👇 Essa rota **tem que ser a última**: serve o front-end do React
+    path("", FrontendAppView.as_view(), name="frontend"),
 ]
 
 if settings.DEBUG:
