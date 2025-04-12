@@ -11,7 +11,7 @@ class Tweet(models.Model):
     )
     content = models.CharField(max_length=280, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    media = models.FileField(upload_to='tweets_media/', null=True, blank=True)
+    media = models.ImageField(upload_to='tweets_media/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.author.username}: {self.content[:30]}"
