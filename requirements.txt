@@ -8,5 +8,8 @@ tzdata==2025.1
 djangorestframework-simplejwt
 firebase-admin
 django-cors-headers
-Pillow>=10.0.0
+Pillow==10.3.0
 whitenoise>=6.6.0
+
+# Pillow 9.5.0 usado temporariamente por compatibilidade no ambiente PythonAnywhere
+
