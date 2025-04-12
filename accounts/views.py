@@ -9,6 +9,9 @@ from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from django.core.mail import send_mail
 from django.conf import settings
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
@@ -209,6 +212,7 @@ class UserDetailByUsernameAPIView(generics.RetrieveAPIView):
     def get_queryset(self):
         return User.objects.all()
 
+@method_decorator(csrf_exempt, name='dispatch')  # <- AQUI, FORA da classe!
 class UserDetailUpdateAPIView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserSerializer
@@ -218,8 +222,13 @@ class UserDetailUpdateAPIView(generics.RetrieveUpdateAPIView):
     def get_queryset(self):
         return User.objects.all()
 
-    def partial_update(self, request, *args, **kwargs):
-        user_obj = self.get_object()
-        if user_obj != request.user:
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance != request.user:
             return Response({"detail": "Você não pode editar outro usuário."}, status=403)
-        return super().partial_update(request, *args, **kwargs)
+
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
