@@ -185,9 +185,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 }
 
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000")
-
-
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
 CORS_ALLOW_ALL_ORIGINS = False
