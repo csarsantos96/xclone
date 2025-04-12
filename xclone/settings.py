@@ -191,6 +191,7 @@ CORS_ALLOW_ALL_ORIGINS = False
 
 CORS_ALLOWED_ORIGINS = [
     "https://csaruto96.pythonanywhere.com",
+
 ]
 
 STATIC_URL = '/static/'
